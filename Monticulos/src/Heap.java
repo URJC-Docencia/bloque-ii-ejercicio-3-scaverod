@@ -1,93 +1,176 @@
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 
-
-
 public class Heap<E> implements HeapInterface<E> {
 
-    
-    
-    // Returns the index of the parent
-    // of the element at ith index.
-    private int parent (int i){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    // Watch these videos to understand the code:
+    // https://youtu.be/t0Cq6tVNRBA
+    // https://youtu.be/WCm3TqScBM8
+    // https://youtu.be/0wPlzMU-k00
+
+    private ArrayList<E> heap;
+    private Comparator<E> comparator;
+
+    public Heap(Comparator<E> c) {
+        this.heap = new ArrayList<>();
+        this.comparator = c;
     }
-    
-    // Returns the index of the left child.
+
+    public Heap() {
+        this(new DefaultComparator<>());
+    }
+
+    /**
+     * Returns the index of the parent node for the given index.
+     *
+     * @param i The index of the node.
+     * @return The index of the parent node.
+     */
+    private int parent(int i) {
+        return (i - 1) / 2;
+    }
+
+    /**
+     * Returns the index of the left child node for the given index.
+     *
+     * @param i The index of the parent node.
+     * @return The index of the left child node.
+     */
     private int leftChild(int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return 2 * i + 1;
     }
-  
-    // Returns the index of the
-    // right child.
+
+    /**
+     * Returns the index of the right child node for the given index.
+     *
+     * @param i The index of the parent node.
+     * @return The index of the right child node.
+     */
     private int rightChild(int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return 2 * i + 2;
     }
-    
-    //siftUp
-    //move a node up in the tree, as long as needed; used to restore heap condition after insertion.
-    private void siftUp(int i){
-       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    /**
+     * Sifts up the element at the given index in the heap, maintaining the heap property.
+     * If the element at the given index is smaller than its parent, the element is swapped with its parent.
+     * This process is repeated until the element is in its correct position or until the index reaches 0 (the root).
+     *
+     * @param i The index of the element to sift up.
+     */
+    private void siftUp(int i) {
+        if (i > 0) { // If the element is at the root, it is already in its correct position.
+            int parent = parent(i); // Get the index of the parent node.
+            if (comparator.compare(heap.get(i), heap.get(parent)) > 0) { // If the parent is larger than the element,
+                swap(i, parent); // swap the element with its parent and sift up the parent.
+                siftUp(parent); // Sift up the parent.
+            }
+        }
     }
-    
-    //siftDown
-    //move a node down in the tree, similar to sift-up; used to restore heap condition after deletion or replacement.
-    private void siftDown(int i){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    /**
+     * Sifts down the element at the given index in the heap, maintaining the heap property.
+     * If the element at the given index is larger than either of its children,
+     * the element is swapped with its smallest child.
+     * This process is repeated until the element is in its correct position or until it reaches a leaf node.
+     *
+     * @param i The index of the element to sift down.
+     */
+    private void siftDown(int i) {
+        int left = leftChild(i); // Get the index of the left child.
+        int right = rightChild(i); // Get the index of the right child.
+        int smallest = i; // Assume the element at the given index is the smallest.
+        if (left < size() && comparator.compare(heap.get(i), heap.get(left)) < 0) { // If the left child is smaller than the element,
+            smallest = left; // the left child is the smallest.
+        }
+        if (right < size() && comparator.compare(heap.get(smallest), heap.get(right)) < 0) { // If the right child is smaller than the element,
+            smallest = right; // the right child is the smallest.
+        } // If the element is not the smallest,
+        if (smallest != i) { // swap it with its smallest child and sift down the child.
+            swap(i, smallest); // Swap the element with its smallest child.
+            siftDown(smallest); // Sift down the child.
+        }
     }
-    
-    
-    public Heap(Comparator<E> c){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    /**
+     * Swaps the elements at the given indices in the heap.
+     *
+     * @param i The index of the first element to swap.
+     * @param j The index of the second element to swap.
+     */
+    private void swap(int i, int j) {
+        E temp = heap.get(i);
+        heap.set(i, heap.get(j));
+        heap.set(j, temp);
     }
-    
-    public Heap(){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-       
+
     @Override
     public boolean add(E e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        heap.add(e);
+        siftUp(heap.size() - 1);
+        return true;
     }
 
     @Override
     public Comparator<? super E> comparator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.comparator;
     }
 
     @Override
     public Iterator<E> iterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.heap.iterator();
     }
 
+    /**
+     * Removes and returns the top element of the heap.
+     *
+     * @return The top element of the heap.
+     */
     @Override
     public E remove() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }   
+        if (heap.isEmpty()) {
+            throw new RuntimeException();
+        }
+        if (heap.size() == 1) {
+            return heap.remove(0);
+        }
+        E sustituto = heap.get(heap.size() - 1);//cojes el último
+        heap.remove(heap.size() - 1); //borras el último
+        E toReturn = heap.set(0, sustituto);//sustituyes la cima
+        siftDown(0);
+        return toReturn;
+    }
 
-    @Override 
-    public E peak(){
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    /**
+     * Returns the top element of the heap without removing it.
+     *
+     * @return The top element of the heap, or null if the heap is empty.
+     */
+    @Override
+    public E peak() {
+        if (isEmpty()) {
+            return null;
+        }
+        return heap.get(0);
     }
 
     @Override
     public boolean isEmpty() {
-	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return heap.isEmpty();
     }
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return heap.size();
     }
 
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        heap.clear();
     }
 
 
-/*       // To String method with debugging purposes
+    // To String method with debugging purposes
     @Override
     public String toString() {
         var sb = new StringBuilder();
@@ -103,21 +186,21 @@ public class Heap<E> implements HeapInterface<E> {
     }
 
 
-    *
+    /**
      * Checks if the heap property is valid for all nodes.
      *
      * @return True if the heap property is valid for all nodes, false otherwise.
-
+     */
     public boolean isHeap() {
         return isHeap(0);
     }
 
-    *
+    /**
      * Checks if the heap property is valid for the node at the given index and all its descendants.
      *
      * @param i The index of the node to check.
      * @return True if the heap property is valid for the node at the given index and all its descendants, false otherwise.
-
+     */
     private boolean isHeap(int i) {
         if (i >= size()) { // If the index is out of bounds, return true.
             return true;
@@ -155,6 +238,6 @@ public class Heap<E> implements HeapInterface<E> {
 
             printHeap(leftChild(i), depth - 1, indent + "   ");
         }
-    }*/
-    
+    }
+
 }
